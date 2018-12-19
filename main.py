@@ -57,10 +57,6 @@ def genAltoTenor(bassLine, sopranoLine, startPitchA, startPitchT):
         if sopranoLine[i]%7 == bassLine[i]:
             #soprano has already doubled bass.
             #pick an option for each
-            if altoLine[i-1] in options:
-                altoLine[i] = altoLine[i-1]
-            elif tenorLine[i-1] in options:
-                tenorLine[i] = tenorLine[i-1]
             third = [bassLine[i] + 2,  bassLine[i] -3]
             fifth = [bassLine[i] + 4, bassLine[i] - 5]
             if min(abs(third[0] - tenorLine[i-1]), abs(third[1] - tenorLine[i-1])) < min(abs(third[0] - tenorLine[i-1]), abs(third[1] - tenorLine[i-1])):
@@ -77,6 +73,10 @@ def genAltoTenor(bassLine, sopranoLine, startPitchA, startPitchT):
             else:
                 altoLine[i] = bassLine[i]
                 tenorLine[i] = findSmallestInt(options, tenorLine[i-1])
+        if altoLine[i - 1] in options:
+            altoLine[i] = altoLine[i - 1]
+        elif tenorLine[i - 1] in options:
+            tenorLine[i] = tenorLine[i - 1]
         i += 1
     return altoLine, tenorLine
 
