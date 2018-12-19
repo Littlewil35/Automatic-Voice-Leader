@@ -12,8 +12,8 @@ def genSoprano(bassLine, startPitch):
     sopranoLine[0] = startPitch
     i = 1
     while i < len(bassLine):
-        options = [bassLine[i] - 7, bassLine[i] - 5, bassLine[i] - 3, bassLine[i], bassLine[i] + 2, bassLine[i] + 4, bassLine[i] + 7,
-                   bassLine[i]+5, bassLine[i]+2, bassLine[i]-2, bassLine[i]-5]
+        options = [bassLine[i] - 7, bassLine[i] - 5, bassLine[i] - 3, bassLine[i], bassLine[i] + 2, bassLine[i] + 4,
+                   bassLine[i] + 7]
         if bassLine[i] > bassLine[i - 1]:
             options = filterGreaterThan(options, sopranoLine[i - 1])
             options = filterJumps(options, sopranoLine[i - 1])
@@ -52,15 +52,15 @@ def genAltoTenor(bassLine, sopranoLine, startPitchA, startPitchT):
         #create options
         options = [bassLine[i] - 7, bassLine[i] - 5, bassLine[i] - 3, bassLine[i], bassLine[i] + 2, bassLine[i] + 4,
                    bassLine[i] + 7]
-        if sopranoLine%7 == bassLine[i]:
-            #soprano has already doubled bass. Remove these options.
-            if bassLine[i] - 7 in options:
-                options.remove(bassLine[i] - 7)
-            if bassLine[i] in options:
-                options.remove(bassLine[i])
-            if bassLine[i] + 7 in options:
-                options.remove(bassLine[i] + 7)
+        options = removeNote(sopranoLine[i], options)
+        options = removeNote(bassLine[i], options)
+        if sopranoLine[i]%7 == bassLine[i]:
+            #soprano has already doubled bass.
             #pick an option for each
+            if altoLine[i-1] in options:
+                altoLine[i] = altoLine[i-1]
+            elif tenorLine[i-1] in options:
+                tenorLine[i] = tenorLine[i-1]
             third = [bassLine[i] + 2,  bassLine[i] -3]
             fifth = [bassLine[i] + 4, bassLine[i] - 5]
             if min(abs(third[0] - tenorLine[i-1]), abs(third[1] - tenorLine[i-1])) < min(abs(third[0] - tenorLine[i-1]), abs(third[1] - tenorLine[i-1])):
@@ -69,98 +69,16 @@ def genAltoTenor(bassLine, sopranoLine, startPitchA, startPitchT):
             else:
                 altoLine[i] = findSmallestInt(third, altoLine[i-1])
                 tenorLine[i] = findSmallestInt(fifth, tenorLine[i-1])
-
-
-
-
         else:
             #soprano hasnt doubled the bass. this note will be given to the part with the shortest interval
             if abs(bassLine[i] - altoLine[i-1]) > abs(bassLine[i] - tenorLine[i-1]):
                 tenorLine[i] = bassLine[i]
-                # figure out which note is left and give it to the alto
-                if sopranoLine[i] in options:
-                    options.remove(sopranoLine[i])
-                if sopranoLine[i] - 8 in options:
-                    options.remove(sopranoLine[i] -8)
-                if sopranoLine[i] + 7 in options:
-                    options.remove(sopranoLine[i]+7)
-                #remove the bass options too, then let alto pick the smallest interval left
+                altoLine[i] = findSmallestInt(options, altoLine[i-1])
             else:
                 altoLine[i] = bassLine[i]
-                #figure out which note is left adn give it to the tenor
-
-
-
-
-"""def genAlto(bassLine, sopranoLine, startPitch):
-    print("Creating the alto line...")
-    altoLine = bassLine[:]
-    altoLine[0] = startPitch
-    i = 1
-    while i < len(bassLine):
-        options = [bassLine[i] - 7, bassLine[i] - 5, bassLine[i] - 3, bassLine[i], bassLine[i] + 2, bassLine[i] + 4, bassLine[i] + 7]
-        if sopranoLine[i] in options:
-            options.remove(sopranoLine[i])
-        if sopranoLine[i]%7 == bassLine[i] or abs(bassLine[i] - altoLine[i-1]) > 3:
-            print("soprano has already doubled the bass note of " + str(bassLine[i]) +
-                 ". Removing option to double bass. Previous options were " + str(options))
-            if bassLine[i]-7 in options:
-                options.remove(bassLine[i]-7)
-            if bassLine[i] in options:
-                options.remove(bassLine[i])
-            if bassLine[i]+7 in options:
-                options.remove(bassLine[i]+7)
-            if altoLine[i-1] in options:
-                altoLine[i] = altoLine[i-1]
-            print("options list is: " + str(options) + ". soprano line at this index is " + str(sopranoLine[i]))
-            k = 0
-            while k < len(options)-1:
-                if options[k] > sopranoLine[i]:
-                    print("adjusted value " + str(options[k]))
-                    options[k] = options[k]-7
-                k += 1
-            options = filterJumps(options, altoLine[i-1])
-            print(str(options))
-            #options = filterRange(-1, 6, options)
-            altoLine[i] = findSmallestInt(options, altoLine[i - 1])
-        else:
-            if sopranoLine[i] <= bassLine[i]:
-                altoLine[i] = bassLine[i]-7
-            else:
-                altoLine[i] = bassLine[i]
+                tenorLine[i] = findSmallestInt(options, tenorLine[i-1])
         i += 1
-    print("Done.")
-    return altoLine
-
-
-def genTenor(bassLine, sopranoLine, altoLine, startPitch):
-    print("Creating tenor line...")
-    tenorLine = bassLine[:]
-    tenorLine[0] = startPitch
-    i = 1
-    while i < len(bassLine):
-        options = [bassLine[i] - 7, bassLine[i] - 5, bassLine[i] - 3, bassLine[i] + 2, bassLine[i] + 4, bassLine[i] + 7]
-        if sopranoLine[i] in options:
-            options.remove(sopranoLine[i])
-        if altoLine[i] in options:
-            options.remove(altoLine[i])
-        if sopranoLine[i]%7 == bassLine[i] or altoLine[i]%7 == bassLine[i] or sopranoLine[i] == bassLine[i] or altoLine[i] == bassLine[i] or abs(bassLine[i] - altoLine[i-1]) > 3:
-            if bassLine[i]-7 in options:
-                options.remove(bassLine[i]-7)
-            if bassLine[i] in options:
-                options.remove(bassLine[i])
-            if bassLine[i]+7 in options:
-                options.remove(bassLine[i]+7)
-            if tenorLine[i-1] in options:
-                tenorLine[i] = tenorLine[i-1]
-            options = filterRange(3,11,options)
-            options = filterJumps(options, tenorLine[i-1])
-            tenorLine[i] = findSmallestInt(options, tenorLine[i-1])
-        else:
-            tenorLine[i] = bassLine[i]
-        i += 1
-    print("Done.")
-    return tenorLine"""
+    return altoLine, tenorLine
 
 
 def filterLessThan(list, val):
@@ -230,7 +148,14 @@ def parallel5(b,s):
         else:
             return False
 
-
+def removeNote(n, l):
+    if n in l:
+        l.remove(n)
+    if n + 7 in l:
+        l.remove(n+7)
+    if n - 8 in l:
+        l.remove(n-8)
+    return l
 
 def filterRange(a,b,l):
     i = 0
@@ -261,7 +186,7 @@ def drawStaff():
 def drawNotes(notes, startPos):
     radius = 10
     for i in range(len(notes)):
-        xPos = -400+60*i
+        xPos = -300+75*i
         yPos = startPos+10*(notes[i]-1)
         if startPos > 0 and yPos <= 90 or yPos >= 210:
             t.up()
@@ -288,16 +213,15 @@ def drawNotes(notes, startPos):
 if __name__ == "__main__":
     bass = [8, 6, 2, 5, 8]
     soprano = genSoprano(bass, 5)
-    #alto = genAlto(bass, soprano, 3)
-    #tenor = genTenor(bass, soprano, alto, 8)
+    alto, tenor = genAltoTenor(bass, soprano, 3, 8)
     print(soprano)
-    #print(alto)
-    #print(tenor)
+    print(alto)
+    print(tenor)
     print(bass)
     drawStaff()
     drawNotes(soprano, 90)
-    #drawNotes(alto, 90)
-    #drawNotes(tenor, -85)
+    drawNotes(alto, 90)
+    drawNotes(tenor, -85)
     drawNotes(bass, -155)
     t.exitonclick()
 
