@@ -1,5 +1,8 @@
 import random
 import turtle as t
+import math
+import pysine
+
 
 """soprano = [5]
 tenor = [8]
@@ -22,6 +25,13 @@ def genSoprano(bassLine, startPitch):
                     options.remove(bassLine[i]+4)
                 if bassLine[i] -3 in options:
                     options.remove(bassLine[i]-3)
+            """if parallel8(bassLine[i-1], sopranoLine[i-1]):
+                if bassLine[i] in options:
+                    options.remove(bassLine[i])
+                if bassLine[i] + 7 in options:
+                    options.remove(bassLine[i] + 7)
+                if bassLine[i] - 6 in options:
+                    options.remove(bassLine[i] - 6)"""
             options = filterRange(4, 11, options)
             sopranoLine[i] = options[random.randint(0, len(options) - 1)]
         else:
@@ -33,6 +43,14 @@ def genSoprano(bassLine, startPitch):
                     options.remove(bassLine[i]+4)
                 if bassLine[i] -3 in options:
                     options.remove(bassLine[i]-3)
+
+            """if parallel8(bassLine[i-1], sopranoLine[i-1]):
+                if bassLine[i] in options:
+                    options.remove(bassLine[i])
+                if bassLine[i] + 7 in options:
+                    options.remove(bassLine[i] + 7)
+                if bassLine[i] - 6 in options:
+                    options.remove(bassLine[i] - 6)"""
             options = filterRange(4, 11, options)
             sopranoLine[i] = options[random.randint(0, len(options) - 1)]
         i += 1
@@ -42,6 +60,7 @@ def genSoprano(bassLine, startPitch):
 
 
 def genAltoTenor(bassLine, sopranoLine, startPitchA, startPitchT):
+    print("Creating alto and tenor lines...")
     altoLine = bassLine[:]
     tenorLine = bassLine[:]
     #set start pitch
@@ -78,6 +97,7 @@ def genAltoTenor(bassLine, sopranoLine, startPitchA, startPitchT):
         elif tenorLine[i - 1] in options:
             tenorLine[i] = tenorLine[i - 1]
         i += 1
+    print("Done.")
     return altoLine, tenorLine
 
 
@@ -148,6 +168,11 @@ def parallel5(b,s):
         else:
             return False
 
+def parallel8(b,s):
+    if (b == s) or (abs(b-s) == 7):
+        return True
+    return False
+
 def removeNote(n, l):
     if n in l:
         l.remove(n)
@@ -187,21 +212,50 @@ def drawNotes(notes, startPos):
     radius = 10
     for i in range(len(notes)):
         xPos = -300+75*i
+        #yPos = -15
         yPos = startPos+10*(notes[i]-1)
-        if startPos > 0 and yPos <= 90 or yPos >= 210:
-            t.up()
-            t.goto(xPos-4, yPos+10)
-            t.down()
-            t.width(5)
-            t.goto(xPos+24, yPos+10)
-            t.width(1)
-        if startPos < 0 and yPos >= -15:
-            t.up()
-            t.goto(xPos - 4, yPos + 10)
-            t.down()
-            t.width(5)
-            t.goto(xPos + 24, yPos + 10)
-            t.width(1)
+        if startPos > 0 and yPos <= 90:
+            counter = math.trunc((90-yPos)/20)
+            while counter >= 0:
+                t.up()
+                t.goto(xPos-4, 100-20*counter)
+                t.down()
+                t.width(5)
+                t.goto(xPos+24, 100-20*counter)
+                t.width(1)
+                counter -= 1
+        elif startPos > 0 and yPos >= 210:
+            #210 and 220 return 0, 230 and 240 return 1, etc.
+            counter = math.trunc((yPos-210)/20)
+            while counter >= 0:
+                t.up()
+                t.goto(xPos - 4, 220 + 20 * counter)
+                t.down()
+                t.width(5)
+                t.goto(xPos + 24, 220 + 20 * counter)
+                t.width(1)
+                counter -= 1
+        elif startPos < 0 and yPos <= -135:
+            counter = math.trunc((-135-yPos)/20)
+            while counter >= 0:
+                t.up()
+                t.goto(xPos - 4, -125 - 20*counter)
+                t.down()
+                t.width(5)
+                t.goto(xPos + 24, -125 - 20*counter)
+                t.width(1)
+                counter -=1
+        elif startPos < 0 and yPos >= -25:
+            counter = math.trunc((-15 - yPos)/20)
+            while counter >= 0:
+                print(counter)
+                t.up()
+                t.goto(xPos - 4, -5 + 20 * counter)
+                t.down()
+                t.width(5)
+                t.goto(xPos + 24, -5 + 20 * counter)
+                t.width(1)
+                counter -= 1
         t.up()
         t.goto(xPos+radius,yPos)
         t.down()
